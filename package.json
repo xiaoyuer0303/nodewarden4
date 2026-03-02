@@ -1,0 +1,54 @@
+{
+  "name": "nodewarden4",
+  "version": "1.1.0",
+  "description": "Minimal Bitwarden-compatible server running on Cloudflare Workers",
+  "author": "shuaiplus",
+  "license": "LGPL-3.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run web:build && wrangler dev -c wrangler.toml",
+    "dev:worker": "wrangler dev -c wrangler.toml",
+    "web:dev": "vite --config webapp/vite.config.ts",
+    "web:build": "vite build --config webapp/vite.config.ts",
+    "web:typecheck": "tsc -p webapp/tsconfig.json --noEmit",
+    "build": "vite build --config webapp/vite.config.ts",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "keywords": [
+    "bitwarden",
+    "vaultwarden",
+    "cloudflare",
+    "workers",
+    "password-manager"
+  ],
+  "cloudflare": {
+    "bindings": {
+      "JWT_SECRET": {
+        "description": "Use a strong random string (32+ characters recommended)"
+      },
+      "DB": {
+        "description": "D1 database for storing vault data"
+      },
+      "ATTACHMENTS": {
+        "description": "R2 bucket for storing file attachments"
+      }
+    }
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260131.0",
+    "@preact/preset-vite": "^2.10.3",
+    "@types/node": "^25.2.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "wrangler": "^4.69.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "lucide-preact": "^0.575.0",
+    "preact": "^10.28.4",
+    "qrcode-generator": "^2.0.4",
+    "wouter": "^3.9.0"
+  }
+}

@@ -1,0 +1,134 @@
+<p align="center">
+  <img src="./NodeWarden.png" alt="NodeWarden Logo" />
+</p>
+
+<p align="center">
+  运行在 Cloudflare Workers 的 Bitwarden 第三方服务端，兼容官方客户端
+</p>
+
+[![Powered by Cloudflare](https://img.shields.io/badge/Powered%20by-Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL--3.0-2ea44f)](./LICENSE)
+[![Deploy to Cloudflare Workers](https://img.shields.io/badge/Deploy%20to-Cloudflare%20Workers-F38020?logo=cloudflare&logoColor=white)](https://deploy.workers.cloudflare.com/?url=https://github.com/shuaiplus/NodeWarden)
+[![Latest Release](https://img.shields.io/github/v/release/shuaiplus/NodeWarden?display_name=tag)](https://github.com/shuaiplus/NodeWarden/releases/latest)
+[![Sync Upstream](https://github.com/shuaiplus/NodeWarden/actions/workflows/sync-upstream.yml/badge.svg)](https://github.com/shuaiplus/NodeWarden/actions/workflows/sync-upstream.yml)
+
+[更新日志](./RELEASE_NOTES.md) • [提交问题](https://github.com/shuaiplus/NodeWarden/issues/new/choose) • [最新发布](https://github.com/shuaiplus/NodeWarden/releases/latest)
+
+English：[`README_EN.md`](./README_EN.md)
+
+
+> **免责声明**  
+> 本项目仅供学习交流使用。我们不对任何数据丢失负责，强烈建议定期备份您的密码库。  
+> 本项目与 Bitwarden 官方无关，请勿向 Bitwarden 官方反馈问题。
+
+---
+## 与 Bitwarden 官方服务端能力对比
+
+| 能力项 | Bitwarden | NodeWarden | 说明 |
+|---|---|---|---|
+| Web Vault（登录/笔记/卡片/身份） | ✅ | ✅ | 网页端密码库管理页面 |
+| 文件夹 / 收藏 | ✅ | ✅ | 常用管理能力可用 |
+| 全量同步 `/api/sync` | ✅ | ✅ | 已做兼容与性能优化 |
+| 附件上传/下载 | ✅ | ✅ | 基于 Cloudflare R2 |
+| 导入功能 | ✅ | ✅ | 覆盖常见导入路径 |
+| 网站图标代理 | ✅ | ✅ | 通过 `/icons/{hostname}/icon.png` |
+| passkey、TOTP字段 | ❌ | ✅ |官方需要会员，我们的不需要 |
+| Send | ✅ | ✅ | 已支持文本 Send 与文件 Send |
+| 多用户 | ✅ | ✅ | 完整的用户管理，邀请机制 |
+| 组织/集合/成员权限 | ✅ | ❌ | 没必要实现 |
+| 登录 2FA（TOTP/WebAuthn/Duo/Email） | ✅ | ⚠️ 部分支持 | 仅支持 TOTP（通过 `TOTP_SECRET`） |
+| SSO / SCIM / 企业目录 | ✅ | ❌ | 没必要实现 |
+| 紧急访问 | ✅ | ❌ | 没必要实现 |
+| 管理后台 / 计费订阅 | ✅ | ❌ | 纯免费 |
+| 推送通知完整链路 | ✅ | ❌ | 没必要实现 |
+
+## 测试情况：
+
+- ✅ Windows 客户端（v2026.1.0）
+- ✅ 手机 App（v2026.1.0）
+- ✅ 浏览器扩展（v2026.1.0）
+- ✅ Linux 客户端（v2026.1.0）
+- ⬜ macOS 客户端（未测试）
+---
+
+# 快速开始
+
+### 一键部署
+
+**部署步骤：**
+
+1. 首先Fork本仓库，命名为**NodeWarden**
+2. 点击下面的一键部署按钮，修改项目名称为**NodeWarden2**，修改**JWT_SECRET**成32为随机字符串
+3. [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/shuaiplus/nodewarden)
+4. 部署完成后，同一页面打开workers设置，将**Git存储库**断开连接
+5. 同一位置，**Git存储库**链接至第一步Fork的仓库
+
+**同步上游（更新）：**
+- 手动：Github打开你Fork的私人仓库，看到顶部同步提示时，点击 “Sync fork”。
+- 自动：进入你的 Fork 仓库 → Actions，点击 “I understand my workflows, go ahead and enable them”，每天凌晨三点自动同步至上游
+
+### CLI 部署
+
+```powershell
+# 先把仓库拉到本地
+git clone https://github.com/shuaiplus/NodeWarden.git
+cd NodeWarden
+
+# 安装依赖
+npm install
+
+# Cloudflare CLI 登录
+npx wrangler login
+
+# 创建云资源（D1 + R2）
+npx wrangler d1 create nodewarden-db
+npx wrangler r2 bucket create nodewarden-attachments
+
+# 部署
+npm run deploy 
+
+# 需更新时重新拉取仓库，重新部署即可，无需创建云资源
+git clone https://github.com/shuaiplus/NodeWarden.git
+cd NodeWarden
+npm run deploy 
+```
+
+---
+
+## 本地开发
+
+这是一个 Cloudflare Workers 的 TypeScript 项目（Wrangler）。
+
+```bash
+npm install
+npm run dev
+```
+---
+## 常见问题
+
+**Q: 如何备份数据？**  
+A: 在客户端中选择「导出密码库」，保存 JSON 文件。
+
+**Q: 忘记主密码怎么办？**  
+A: 无法恢复，这是端到端加密的特性。建议妥善保管主密码。
+
+**Q: 可以多人使用吗？**  
+A: 支持。第一个注册的用户自动成为管理员，管理员可在管理页面生成邀请码，其他用户凭邀请码注册。
+
+---
+
+## 开源协议
+
+LGPL-3.0 License
+
+---
+
+## 致谢
+
+- [Bitwarden](https://bitwarden.com/) - 原始设计和客户端
+- [Vaultwarden](https://github.com/dani-garcia/vaultwarden) - 服务器实现参考
+- [Cloudflare Workers](https://workers.cloudflare.com/) - 无服务器平台
+---
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=shuaiplus/NodeWarden&type=timeline&legend=top-left)](https://www.star-history.com/#shuaiplus/NodeWarden&type=timeline&legend=top-left)
